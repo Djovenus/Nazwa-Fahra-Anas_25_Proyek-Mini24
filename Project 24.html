@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Project 24</title>
+    <style>
+        body {
+            font-family: Times New Roman;
+            margin: 100px;
+            font-size: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        #dataForm {
+            margin-bottom: 50px;
+        }
+
+        #question,
+        #options,
+        #time {
+            border: 1px solid black;
+            font-size: 20px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        #question {
+            margin-left: 50px;
+        }
+
+        #options {
+            margin-left: 65px;
+        }
+
+        #time {
+            margin-left: 105px;
+        }
+
+        #button {
+            padding: 10px;
+            margin-top: 20px;
+            margin-left: 190px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 20px;
+            text-align: center;
+        }
+
+        button {
+            margin-top: 5px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+
+        .edit-button,
+        .delete-button {
+            margin-left: 10px;
+        }
+
+        .edit-input {
+            width: 80%;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form id="dataForm">
+            <label>Question</label>
+            <input type="text" id="question" required><br>
+            <span id="questionError" class="error-message"></span><br>
+
+            <label>Options</label>
+            <input type="text" id="options" required><br>
+            <span id="optionsError" class="error-message"></span><br>
+
+            <label>Time</label>
+            <input type="text" id="time"><label>Menit</label><br>
+            <span id="timeError" class="error-message"></span><br>
+
+            <button type="submit" id="button">Generate</button>
+        </form>
+
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Question</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        let questions = [];
+
+        function validateInput(question, options, time) {
+            let isValid = true;
+
+            document.getElementById("questionError").textContent = "";
+            document.getElementById("optionsError").textContent = "";
+            document.getElementById("timeError").textContent = "";
+
+            if (question.length < 5) {
+                document.getElementById("questionError").textContent = "Pertanyaan minimal 5 karakter!";
+                isValid = false;
+            }
+
+            const optionArray = options.split(",");
+            if (optionArray.length !== 4) {
+                document.getElementById("optionsError").textContent = "Harus ada 4 opsi yang dipisahkan dengan koma!";
+                isValid = false;
+            }
+
+            if (time < 1) {
+                document.getElementById("timeError").textContent = "Waktu minimal 1 menit!";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function formatTime(minutes) {
+            const mins = Math.floor(minutes);
+            const secs = Math.floor((minutes % 1) * 60);
+            return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+        }
+
+        function generateQuestion(event) {
+            event.preventDefault();
+
+            const question = document.getElementById("question").value.trim();
+            const options = document.getElementById("options").value.trim();
+            const time = parseInt(document.getElementById("time").value);
+
+            if (!validateInput(question, options, time)) {
+                return;
+            }
+
+            const newQuestion = {
+                id: questions.length + 1,
+                question: question,
+                options: options.split(","),
+                time: time,
+            };
+            questions.push(newQuestion);
+
+            updateQuestionList();
+
+            document.getElementById("question").value = "";
+            document.getElementById("options").value = "";
+            document.getElementById("time").value = "4";
+        }
+
+        function updateQuestionList() {
+            const questionList = document.querySelector("#dataTable tbody");
+            questionList.innerHTML = "";
+
+            questions.forEach((q, index) => {
+                const row = document.createElement("tr");
+
+                const noCell = document.createElement("td");
+                noCell.textContent = index + 1;
+                row.appendChild(noCell);
+
+                const questionCell = document.createElement("td");
+                questionCell.innerHTML = `
+                    ${q.question}<br>
+                    <div class="radio-group">
+                        <input type="radio" name="question${q.id}"> A. ${q.options[0]}<br>
+                        <input type="radio" name="question${q.id}"> B. ${q.options[1]}<br>
+                        <input type="radio" name="question${q.id}"> C. ${q.options[2]}<br>
+                        <input type="radio" name="question${q.id}"> D. ${q.options[3]}<br>
+                    </div>
+                `;
+                row.appendChild(questionCell);
+
+                const timeCell = document.createElement("td");
+                timeCell.textContent = formatTime(q.time);
+                row.appendChild(timeCell);
+
+                questionList.appendChild(row);
+            });
+        }
+
+        document.getElementById("dataForm").addEventListener("submit", generateQuestion);
+    </script>
+</body>
+
+</html>
